@@ -115,7 +115,8 @@ ln.APP = {
     CABIFY: "cabify",
     BAIDU: "baidu",
     TAXIS_99: "taxis_99",
-    GAODE: "gaode"
+    GAODE: "gaode",
+    TOMTOM: "tomtom"
 };
 
 /**
@@ -138,7 +139,8 @@ ln.APPS_BY_PLATFORM[ln.PLATFORM.ANDROID] = [
     ln.APP.CABIFY,
     ln.APP.BAIDU,
     ln.APP.TAXIS_99,
-    ln.APP.GAODE
+    ln.APP.GAODE,
+    ln.APP.TOMTOM
 ];
 ln.APPS_BY_PLATFORM[ln.PLATFORM.IOS] = [
     ln.APP.USER_SELECT,
@@ -388,7 +390,8 @@ ln.SUPPORTS_DEST_NAME[ln.PLATFORM.ANDROID] = [
     ln.APP.CABIFY,
     ln.APP.BAIDU,
     ln.APP.TAXIS_99,
-    ln.APP.GAODE
+    ln.APP.GAODE,
+    ln.APP.TOMTOM
 ];
 ln.SUPPORTS_DEST_NAME[ln.PLATFORM.IOS] = [
     ln.APP.USER_SELECT,

@@ -78,6 +78,7 @@ public class LaunchNavigator {
     public final String BAIDU = "baidu";
     public final String TAXIS_99 = "taxis_99";
     public final String GAODE = "gaode";
+    public final String TOMTOM = "tomtom";
 
 
     public final Map<String, String> supportedAppPackages;
@@ -97,6 +98,7 @@ public class LaunchNavigator {
         _supportedAppPackages.put(BAIDU, "com.baidu.BaiduMap");
         _supportedAppPackages.put(TAXIS_99, "com.taxis99");
         _supportedAppPackages.put(GAODE, "com.autonavi.minimap");
+        _supportedAppPackages.put(TOMTOM, "com.tomtom.navpad.navapp");
         supportedAppPackages = Collections.unmodifiableMap(_supportedAppPackages);
     }
 
@@ -117,6 +119,7 @@ public class LaunchNavigator {
         _supportedAppNames.put(BAIDU, "Baidu Maps");
         _supportedAppNames.put(TAXIS_99, "99 Taxi");
         _supportedAppNames.put(GAODE, "Gaode Maps (Amap)");
+        _supportedAppNames.put(TOMTOM, "TomTom");
         supportedAppNames = Collections.unmodifiableMap(_supportedAppNames);
     }
 
@@ -272,8 +275,10 @@ public class LaunchNavigator {
             error = launchBaidu(params);
         }else if(appName.equals(GAODE)){
             error = launchGaode(params);
-        }else if(appName.equals(TAXIS_99)){
+        }else if(appName.equals(TAXIS_99)) {
             error = launch99Taxis(params);
+        }else if(appName.equals(TOMTOM)) {
+            error = launchTomTom(params);
         }else{
             error = launchApp(params);
         }
@@ -1561,6 +1566,65 @@ public class LaunchNavigator {
         }
     }
 
+    private String launchTomTom(JSONObject params) throws Exception{
+        String appName = params.getString("app");
+        String dType = params.getString("dType");
+        String dNickName = params.getString("destNickname");
+
+        String logMsg = "Using " + getAppDisplayName(appName)+" to navigate to ";
+        String destLatLon = null;
+        String destName = null;
+        String dest;
+
+        if(dType.equals("name")){
+            destName = getLocationFromName(params, "dest");
+            try{
+                destLatLon = geocodeAddressToLatLon(params.getString("dest"));
+            }catch(Exception e){
+                return "Unable to geocode destination address to coordinates: " + e.getMessage();
+            }
+            logMsg += destName;
+            if(!isNull(destLatLon)){
+                logMsg += "["+destLatLon+"]";
+            }
+
+        }else{
+            destLatLon = getLocationFromPos(params, "dest");
+            logMsg += "["+destLatLon+"]";
+        }
+
+        if(!isNull(destLatLon)){
+            dest = destLatLon;
+        }else{
+            dest = destName;
+        }
+
+        String uri = GEO_URI+destLatLon;
+        if(!isNull(dNickName)){
+            uri += "("+dNickName+")";
+            logMsg += "("+dNickName+")";
+        }
+
+        String extras = parseExtrasToUrl(params);
+        if(!isNull(extras)){
+            uri += extras;
+            logMsg += " - extras="+extras;
+        }
+
+        logger.debug(logMsg);
+        logger.debug("URI: " + uri);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        if(!appName.equals(GEO)){
+            if(appName.equals(GOOGLE_MAPS)) {
+                appName = supportedAppPackages.get(GOOGLE_MAPS);
+            }
+            intent.setPackage(supportedAppPackages.get(appName));
+        }
+        invokeIntent(intent);
+        return null;
+    }
+
     /*
      * Utilities
      */
@@ -1705,11 +1769,12 @@ public class LaunchNavigator {
     }
 
     private JSONObject ensureNavigateKeys(JSONObject params) throws Exception{
-        for(String param : navigateParams){
-            if(!params.has(param)){
+        for(String param : navigateParams) {
+            if (!params.has(param)) {
                 params.put(param, "null");
             }
         }
+
         return params;
     }
 
